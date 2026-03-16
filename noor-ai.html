@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Noor AI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05050c;--s1:#0b0b18;--s2:#111122;--s3:#171730;
+  --b1:rgba(100,80,255,.12);--b2:rgba(100,80,255,.25);
+  --a:#7c5cff;--a2:#ff58b0;--gold:#ffc94d;--teal:#3fffd2;
+  --tx:#e8e4ff;--mu:#5a577a;--err:#ff4466;--ok:#3fffa0;
+  --pg:linear-gradient(135deg,#ffc94d,#ff8c3d,#ff58b0);
+  --ag:linear-gradient(135deg,#7c5cff,#ff58b0);
+  --r:12px;--rs:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overscroll-behavior:none;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);overflow:hidden;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 80% 60% at 10% 0%,rgba(124,92,255,.06),transparent 55%),
+             radial-gradient(ellipse 60% 70% at 90% 100%,rgba(255,88,176,.05),transparent 55%);}
+
+/* ══ SPLASH ══ */
+#splash{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .4s;}
+#splash.out{opacity:0;pointer-events:none;}
+.splash-logo{font-family:'Playfair Display',serif;font-size:3rem;font-weight:700;background:var(--ag);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.splash-dots{display:flex;gap:6px;}
+.splash-dots span{width:7px;height:7px;border-radius:50%;background:var(--a);animation:sdot 1.2s infinite ease-in-out both;}
+.splash-dots span:nth-child(2){animation-delay:-.16s;background:var(--a2);}
+.splash-dots span:nth-child(3){animation-delay:-.32s;background:var(--gold);}
+@keyframes sdot{0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
+
+/* ══ AUTH ══ */
+#authWrap{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg);overflow-y:auto;}
+.auth-box{width:100%;max-width:400px;background:var(--s1);border:1px solid var(--b2);border-radius:20px;padding:32px 28px;position:relative;overflow:hidden;animation:fadeup .4s ease both;}
+.auth-box::before{content:'';position:absolute;top:-60px;right:-60px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(124,92,255,.12),transparent 70%);}
+.auth-logo{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;background:var(--ag);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.auth-sub{color:var(--mu);font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:24px;}
+.auth-toggle{display:flex;border-radius:10px;overflow:hidden;border:1px solid var(--b1);margin-bottom:20px;}
+.auth-toggle button{flex:1;padding:9px;border:none;background:transparent;color:var(--mu);font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .18s;}
+.auth-toggle button.on{background:var(--a);color:#fff;}
+.fi{margin-bottom:11px;}
+.fi label{display:block;font-size:.65rem;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--mu);margin-bottom:5px;}
+.fi input{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);padding:11px 13px;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color .18s;}
+.fi input:focus{border-color:var(--a);}
+.fi input::placeholder{color:var(--mu);}
+.plan-row{display:flex;gap:8px;margin-bottom:12px;}
+.plan-card{flex:1;padding:11px;border-radius:var(--rs);border:1px solid var(--b1);background:var(--s2);cursor:pointer;text-align:center;transition:all .18s;}
+.plan-card.on{border-color:var(--a);background:rgba(124,92,255,.1);}
+.plan-card.pro-c.on{border-color:var(--gold);background:rgba(255,201,77,.07);}
+.plan-card h4{font-size:.8rem;font-weight:700;margin-bottom:2px;}
+.plan-card.pro-c h4{background:var(--pg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.plan-card p{font-size:.67rem;color:var(--mu);}
+.pay-box{background:rgba(255,201,77,.05);border:1px solid rgba(255,201,77,.18);border-radius:var(--rs);padding:11px;margin-bottom:10px;display:none;font-size:.76rem;color:var(--mu);line-height:1.7;}
+.pay-box.on{display:block;}
+.pay-box strong{color:var(--tx);}
+.btn-main{width:100%;padding:12px;border-radius:var(--rs);border:none;background:var(--ag);color:#fff;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;margin-top:4px;position:relative;overflow:hidden;}
+.btn-main:active{transform:scale(.98);}
+.btn-main:disabled{opacity:.5;cursor:not-allowed;}
+.btn-main.gold{background:var(--pg);color:#1a0900;}
+.auth-msg{font-size:.78rem;text-align:center;margin-top:8px;min-height:16px;}
+.auth-msg.e{color:var(--err);}
+.auth-msg.ok{color:var(--ok);}
+
+/* ══ APP SHELL ══ */
+#app{display:none;height:100vh;flex-direction:column;}
+#app.on{display:flex;}
+
+/* ══ HEADER ══ */
+.hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(5,5,12,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--b1);flex-shrink:0;position:relative;z-index:20;}
+.hdr-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;background:var(--ag);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;flex:1;}
+.hdr-badge{padding:3px 9px;border-radius:100px;font-size:.62rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;}
+.hdr-badge.free{background:rgba(124,92,255,.14);color:var(--a);border:1px solid rgba(124,92,255,.28);}
+.hdr-badge.pro{background:rgba(255,201,77,.14);color:var(--gold);border:1px solid rgba(255,201,77,.28);}
+.icon-btn{width:34px;height:34px;border-radius:var(--rs);border:1px solid var(--b1);background:transparent;color:var(--mu);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all .18s;flex-shrink:0;}
+.icon-btn:hover{color:var(--tx);border-color:var(--b2);}
+.live-btn{padding:5px 12px;border-radius:100px;border:none;background:linear-gradient(135deg,#ff4466,#ff8c3d);color:#fff;font-family:'DM Sans',sans-serif;font-size:.7rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;animation:pulse-live 2s infinite;}
+.live-btn.active{background:linear-gradient(135deg,#3fffa0,#3fffd2);color:#000;}
+@keyframes pulse-live{0%,100%{box-shadow:0 0 0 0 rgba(255,68,102,.4);}50%{box-shadow:0 0 0 6px rgba(255,68,102,0);}}
+.live-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+/* ══ TAB BAR ══ */
+.tabs{display:flex;gap:2px;padding:8px 10px 0;background:rgba(5,5,12,.6);flex-shrink:0;overflow-x:auto;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:7px 12px;border-radius:var(--rs);border:none;background:transparent;color:var(--mu);font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:4px;}
+.tab.on{background:var(--s2);color:var(--tx);border:1px solid var(--b2);}
+.pro-pip{font-size:.5rem;background:var(--pg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:800;letter-spacing:.5px;}
+
+/* ══ PANELS ══ */
+.panels{flex:1;overflow-y:auto;padding:16px 14px 32px;position:relative;z-index:1;}
+.panels::-webkit-scrollbar{width:3px;}
+.panels::-webkit-scrollbar-thumb{background:var(--b1);border-radius:2px;}
+.panel{display:none;max-width:780px;margin:0 auto;animation:fadeup .28s ease both;}
+.panel.on{display:block;}
+@keyframes fadeup{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* ══ CARDS ══ */
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:14px;margin-bottom:12px;transition:border-color .18s;}
+.card:focus-within{border-color:var(--b2);}
+.lbl{font-size:.62rem;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--a);margin-bottom:7px;}
+textarea,select,input[type=text],input[type=password],input[type=email]{width:100%;background:transparent;border:none;outline:none;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:.9rem;resize:none;line-height:1.7;caret-color:var(--a);}
+textarea::placeholder,input::placeholder{color:var(--mu);}
+select option{background:var(--s2);}
+.hr{height:1px;background:var(--b1);margin:10px 0;}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.sel-wrap{display:flex;align-items:center;gap:5px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);padding:6px 10px;flex:0 0 auto;}
+.sel-wrap span{font-size:.64rem;color:var(--mu);white-space:nowrap;}
+.sel-wrap select{min-width:80px;font-size:.8rem;}
+.char-c{font-size:.64rem;color:var(--mu);margin-left:auto;}
+
+/* ══ INPUT TOOLBAR ══ */
+.input-toolbar{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-top:8px;}
+.tool-btn{width:32px;height:32px;border-radius:var(--rs);border:1px solid var(--b1);background:transparent;color:var(--mu);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;transition:all .18s;flex-shrink:0;}
+.tool-btn:hover{color:var(--tx);border-color:var(--b2);background:var(--s2);}
+.tool-btn.recording{background:rgba(255,68,102,.15);border-color:rgba(255,68,102,.4);color:var(--err);animation:rec-pulse 1s infinite;}
+@keyframes rec-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,68,102,.4);}50%{box-shadow:0 0 0 5px rgba(255,68,102,0);}}
+.file-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:100px;background:rgba(124,92,255,.12);border:1px solid rgba(124,92,255,.25);font-size:.72rem;color:var(--tx);max-width:180px;}
+.file-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.file-chip button{background:none;border:none;color:var(--mu);cursor:pointer;font-size:.75rem;flex-shrink:0;}
+
+/* ══ BUTTONS ══ */
+.btn{padding:8px 16px;border-radius:var(--rs);border:none;background:var(--ag);color:#fff;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:5px;}
+.btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px rgba(124,92,255,.28);}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.btn.gold{background:var(--pg);color:#1a0900;}
+.btn.ghost{background:transparent;border:1px solid var(--b1);color:var(--mu);}
+.btn.ghost:hover{color:var(--tx);border-color:var(--b2);}
+.btn.full{width:100%;justify-content:center;}
+.btn.danger{background:rgba(255,68,102,.12);border:1px solid rgba(255,68,102,.28);color:var(--err);}
+
+/* ══ OUTPUT ══ */
+.out-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:12px;}
+.out-hdr{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;border-bottom:1px solid var(--b1);background:rgba(124,92,255,.04);}
+.out-title{font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--a);}
+.out-body{padding:14px;line-height:1.85;font-size:.87rem;white-space:pre-wrap;word-break:break-word;max-height:400px;overflow-y:auto;}
+.out-body::-webkit-scrollbar{width:3px;}
+.out-body::-webkit-scrollbar-thumb{background:var(--b1);}
+
+/* ══ LOADING ══ */
+.dots{display:inline-flex;gap:4px;align-items:center;padding:6px 0;}
+.dots span{width:6px;height:6px;border-radius:50%;background:var(--a);animation:sdot 1.2s infinite ease-in-out both;}
+.dots span:nth-child(2){animation-delay:-.16s;}
+.dots span:nth-child(3){animation-delay:-.32s;}
+
+/* ══ LIVE AI MODAL ══ */
+#liveModal{position:fixed;inset:0;z-index:200;background:rgba(5,5,12,.95);display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;}
+#liveModal.on{display:flex;}
+.live-orb{width:120px;height:120px;border-radius:50%;background:var(--ag);display:flex;align-items:center;justify-content:center;font-size:2.5rem;cursor:pointer;box-shadow:0 0 0 0 rgba(124,92,255,.4);transition:all .2s;}
+.live-orb.listening{animation:orb-pulse 1.4s infinite;}
+.live-orb.thinking{animation:orb-spin 1.5s linear infinite;}
+@keyframes orb-pulse{0%,100%{box-shadow:0 0 0 0 rgba(124,92,255,.5);}50%{box-shadow:0 0 0 28px rgba(124,92,255,0);}}
+@keyframes orb-spin{from{filter:hue-rotate(0deg);}to{filter:hue-rotate(360deg);}}
+.live-status{font-size:.88rem;color:var(--mu);letter-spacing:1px;text-transform:uppercase;}
+.live-transcript{max-width:380px;text-align:center;font-size:.9rem;color:var(--tx);line-height:1.7;min-height:48px;padding:0 20px;}
+.live-response{max-width:380px;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);padding:14px;font-size:.84rem;line-height:1.7;max-height:220px;overflow-y:auto;display:none;}
+
+/* ══ QUICK CARDS ══ */
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.qcard{padding:10px 12px;border-radius:var(--r);border:1px solid var(--b1);background:var(--s1);cursor:pointer;transition:all .18s;text-align:left;font-family:'DM Sans',sans-serif;}
+.qcard:hover{border-color:var(--b2);background:var(--s2);}
+.qcard strong{display:block;font-size:.72rem;color:var(--a);margin-bottom:2px;}
+.qcard span{font-size:.7rem;color:var(--mu);}
+
+/* ══ IMAGE ══ */
+.style-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:5px;margin-top:5px;}
+.style-btn{padding:7px 8px;border-radius:var(--rs);border:1px solid var(--b1);background:transparent;color:var(--mu);font-family:'DM Sans',sans-serif;font-size:.7rem;cursor:pointer;transition:all .18s;text-align:left;}
+.style-btn.on,.style-btn:hover{border-color:rgba(124,92,255,.4);color:var(--tx);background:rgba(124,92,255,.08);}
+.size-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;}
+.size-btn{padding:5px 11px;border-radius:var(--rs);border:1px solid var(--b1);background:transparent;color:var(--mu);font-size:.7rem;cursor:pointer;transition:all .18s;font-family:'DM Sans',sans-serif;}
+.size-btn.on,.size-btn:hover{border-color:rgba(63,255,210,.4);color:var(--teal);background:rgba(63,255,210,.07);}
+.img-wrap{padding:14px;text-align:center;}
+.img-wrap img{max-width:100%;border-radius:var(--r);border:1px solid var(--b1);box-shadow:0 16px 48px rgba(0,0,0,.6);}
+
+/* ══ CHAT BUBBLES ══ */
+.chat-box{min-height:120px;max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:10px;padding:4px 0;}
+.chat-box::-webkit-scrollbar{width:3px;}
+.msg{display:flex;}
+.msg.u{justify-content:flex-end;}
+.bubble{max-width:82%;padding:8px 12px;border-radius:11px;font-size:.83rem;line-height:1.6;}
+.msg.u .bubble{background:var(--ag);color:#fff;}
+.msg.a .bubble{background:var(--s2);border:1px solid var(--b1);color:var(--tx);}
+
+/* ══ QUIZ ══ */
+.q-opt{width:100%;padding:9px 13px;border-radius:var(--rs);border:1px solid var(--b1);background:transparent;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:.82rem;text-align:left;cursor:pointer;transition:all .18s;margin-bottom:5px;display:block;}
+.q-opt:hover{border-color:var(--b2);background:rgba(124,92,255,.07);}
+.q-opt.right{border-color:var(--ok);background:rgba(63,255,160,.08);color:var(--ok);}
+.q-opt.wrong{border-color:var(--err);background:rgba(255,68,102,.08);color:var(--err);}
+
+/* ══ MOOD ══ */
+.mood-row{display:flex;gap:7px;flex-wrap:wrap;margin:7px 0;}
+.mood-btn{padding:7px 13px;border-radius:100px;border:1px solid var(--b1);background:transparent;font-size:.82rem;cursor:pointer;transition:all .18s;font-family:'DM Sans',sans-serif;color:var(--tx);}
+.mood-btn.on,.mood-btn:hover{border-color:var(--b2);background:var(--s2);}
+
+/* ══ PRO LOCK ══ */
+.pro-lock{text-align:center;padding:32px 20px;}
+.pro-lock h3{font-family:'Playfair Display',serif;font-size:1.4rem;background:var(--pg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
+.pro-lock p{color:var(--mu);font-size:.82rem;margin-bottom:16px;line-height:1.6;}
+
+/* ══ COMPARE ══ */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.cmp{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:13px;}
+.cmp.pro{border-color:rgba(255,201,77,.25);background:rgba(255,201,77,.03);}
+.cmp h4{font-size:.78rem;font-weight:700;margin-bottom:9px;}
+.cmp.pro h4{background:var(--pg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.fl{list-style:none;display:flex;flex-direction:column;gap:5px;}
+.fl li{font-size:.71rem;color:var(--mu);display:flex;align-items:flex-start;gap:4px;line-height:1.4;}
+.ck{flex-shrink:0;color:var(--ok);font-size:.7rem;}
+.ck.n{color:var(--err);}
+
+/* ══ SETTINGS ══ */
+.sup-link{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--r);border:1px solid var(--b1);background:var(--s2);text-decoration:none;color:var(--tx);transition:border-color .18s;margin-bottom:8px;}
+.sup-link:hover{border-color:var(--b2);}
+.sup-link .si{font-size:1.2rem;}
+.sup-link div{flex:1;}
+.sup-link .st{font-size:.82rem;font-weight:600;}
+.sup-link .ss{font-size:.72rem;color:var(--mu);}
+
+/* ══ UPGRADE MODAL ══ */
+#upgradeModal{position:fixed;inset:0;z-index:300;background:rgba(5,5,12,.96);display:none;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+#upgradeModal.on{display:flex;}
+.upgrade-box{background:var(--s1);border:1px solid var(--b2);border-radius:20px;padding:32px 26px;width:100%;max-width:460px;animation:fadeup .3s ease both;}
+
+/* ══ USER MENU ══ */
+#userMenu{position:fixed;inset:0;z-index:250;background:rgba(5,5,12,.88);display:none;align-items:center;justify-content:center;padding:20px;}
+#userMenu.on{display:flex;}
+.umbox{background:var(--s1);border:1px solid var(--b2);border-radius:16px;padding:20px;width:100%;max-width:290px;animation:fadeup .25s ease both;}
+
+/* ══ TOAST ══ */
+#toast{position:fixed;bottom:20px;right:14px;z-index:999;padding:9px 14px;border-radius:var(--r);background:var(--s2);border:1px solid var(--b2);color:var(--tx);font-size:.76rem;transform:translateY(12px);opacity:0;transition:all .22s;pointer-events:none;max-width:260px;}
+#toast.on{transform:translateY(0);opacity:1;}
+
+/* ══ SIDEBAR ══ */
+.sidebar{width:250px;min-width:250px;background:var(--s1);border-right:1px solid var(--b1);display:flex;flex-direction:column;height:100%;overflow:hidden;transition:transform .28s,margin .28s;}
+.sidebar.hidden{transform:translateX(-250px);margin-right:-250px;}
+.sb-top{padding:14px 12px 10px;border-bottom:1px solid var(--b1);}
+.sb-logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;background:var(--ag);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:9px;}
+.new-chat{width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--b2);background:rgba(124,92,255,.09);color:var(--tx);font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .18s;}
+.new-chat:hover{background:rgba(124,92,255,.18);}
+.sb-sec{font-size:.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--mu);padding:10px 12px 4px;opacity:.6;}
+.sb-list{flex:1;overflow-y:auto;padding:3px 5px;}
+.sb-list::-webkit-scrollbar{width:2px;}
+.sb-list::-webkit-scrollbar-thumb{background:var(--b1);}
+.ci{padding:8px 9px;border-radius:var(--rs);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:7px;margin-bottom:2px;}
+.ci:hover{background:var(--s2);}
+.ci.on{background:rgba(124,92,255,.1);border:1px solid rgba(124,92,255,.18);}
+.ci-ico{font-size:.85rem;flex-shrink:0;opacity:.7;}
+.ci-info{flex:1;min-width:0;}
+.ci-title{font-size:.74rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ci-sub{font-size:.64rem;color:var(--mu);margin-top:1px;}
+.ci-del{width:20px;height:20px;border-radius:5px;border:none;background:transparent;color:var(--mu);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:.68rem;flex-shrink:0;}
+.ci:hover .ci-del{display:flex;}
+.ci-del:hover{background:rgba(255,68,102,.15);color:var(--err);}
+.sb-foot{padding:9px 7px;border-top:1px solid var(--b1);}
+.sb-user{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:var(--rs);background:var(--s2);cursor:pointer;transition:all .15s;}
+.sb-user:hover{border:1px solid var(--b2);}
+.ava{width:28px;height:28px;border-radius:50%;background:var(--ag);display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:700;color:#fff;flex-shrink:0;}
+.sb-uinfo{flex:1;min-width:0;}
+.sb-uname{font-size:.76rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-uplan{font-size:.62rem;color:var(--mu);}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:640px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;}
+  .sidebar.hidden{transform:translateX(-250px);}
+  .compare{grid-template-columns:1fr;}
+  .quick-grid{grid-template-columns:1fr;}
+  .auth-box{padding:24px 18px;}
+}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo">✦ Noor AI</div>
+  <div class="splash-dots"><span></span><span></span><span></span></div>
+</div>
+
+<!-- AUTH -->
+<div id="authWrap" style="display:none">
+  <div class="auth-box">
+    <div id="localNotice" style="display:none;background:rgba(255,68,102,.08);border:1px solid rgba(255,68,102,.25);border-radius:10px;padding:12px;margin-bottom:14px;font-size:.78rem;color:#ff7a8a;line-height:1.7;">
+      <strong>⚠️ Opened from local file</strong><br>
+      Login will not work from a local file.<br>
+      <strong>To fix:</strong> Upload to <a href="https://netlify.com" target="_blank" style="color:#ff9aaa;font-weight:700">Netlify.com</a> (free, 2 minutes) and open from that URL.
+    </div>
+    <div class="auth-logo">✦ Noor AI</div>
+    <div class="auth-sub">Your Intelligent Companion</div>
+    <div class="auth-toggle">
+      <button id="tabLogin" class="on" onclick="authMode('login')">Sign In</button>
+      <button id="tabReg" onclick="authMode('reg')">Create Account</button>
+    </div>
+    <!-- LOGIN -->
+    <div id="fLogin">
+      <div class="fi"><label>Email</label><input id="lEmail" type="text" placeholder="you@example.com" autocomplete="email"></div>
+      <div class="fi"><label>Password</label><input id="lPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')tryLogin()"></div>
+      <button class="btn-main" id="loginBtn" onclick="tryLogin()">Sign In →</button>
+      <div class="auth-msg" id="lMsg"></div>
+    </div>
+    <!-- REGISTER -->
+    <div id="fReg" style="display:none">
+      <div class="fi"><label>Full Name</label><input id="rName" type="text" placeholder="Your name"></div>
+      <div class="fi"><label>Email</label><input id="rEmail" type="text" placeholder="you@example.com" autocomplete="email"></div>
+      <div class="fi"><label>Password</label><input id="rPass" type="password" placeholder="Min 6 characters"></div>
+      <div class="fi"><label>Choose Plan</label></div>
+      <div class="plan-row">
+        <div class="plan-card on" id="pcFree" onclick="pickPlan('free')"><h4>🆓 Free</h4><p>Always free</p></div>
+        <div class="plan-card pro-c" id="pcPro" onclick="pickPlan('pro')"><h4>⭐ Pro</h4><p>₦1,500/mo</p></div>
+      </div>
+      <div class="pay-box" id="payBox">
+        <strong>💳 Pay via Opay — ₦1,500/month</strong><br>
+        Account: <strong>9094938980</strong><br>
+        Name: <strong>Kareem Zainab Temitope</strong><br>
+        Also: <strong>₦3,500/quarter</strong> (save ₦1,000)<br><br>
+        Send payment then enter reference below.
+      </div>
+      <div class="fi" id="refWrap" style="display:none"><label>Payment Reference</label><input id="rRef" type="text" placeholder="e.g. OPY123456789"></div>
+      <button class="btn-main" id="regBtn" onclick="tryRegister()">Create Account →</button>
+      <div class="auth-msg" id="rMsg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div style="display:flex;height:100vh;overflow:hidden;position:relative;z-index:1;">
+    <!-- Sidebar -->
+    <div class="sidebar hidden" id="sidebar">
+      <div class="sb-top">
+        <div class="sb-logo">✦ Noor AI</div>
+        <button class="new-chat" onclick="newChat()">✦ New Conversation</button>
+      </div>
+      <div class="sb-sec">Recent Chats</div>
+      <div class="sb-list" id="sbList"><div style="padding:18px 10px;text-align:center;color:var(--mu);font-size:.72rem">Your chats appear here</div></div>
+      <div class="sb-foot">
+        <div class="sb-user" onclick="openUserMenu()">
+          <div class="ava" id="sbAva">N</div>
+          <div class="sb-uinfo"><div class="sb-uname" id="sbName">User</div><div class="sb-uplan" id="sbPlan">Free</div></div>
+          <span style="color:var(--mu);font-size:.7rem">⋯</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div style="flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;min-width:0;">
+      <!-- Header -->
+      <div class="hdr">
+        <button class="icon-btn" onclick="toggleSidebar()">☰</button>
+        <div class="hdr-logo">✦ Noor AI</div>
+        <button class="live-btn" id="liveBtnH" onclick="openLive()">
+          <span class="live-dot"></span> Go Live
+        </button>
+        <div class="hdr-badge free" id="hdrBadge">FREE</div>
+        <button class="icon-btn" onclick="openUserMenu()" id="hdrAva" style="font-weight:700;font-size:.82rem;">N</button>
+      </div>
+
+      <!-- Hosting notice -->
+      <div id="hostBanner" style="display:none;background:rgba(255,201,77,.08);border-bottom:1px solid rgba(255,201,77,.22);padding:8px 14px;font-size:.73rem;color:var(--gold);text-align:center;">
+        ⚡ AI features need a hosted URL. <a href="https://netlify.com" target="_blank" style="color:var(--gold);font-weight:700;text-decoration:underline">Host free on Netlify.com</a> — drag &amp; drop this file!
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs" id="tabBar">
+        <button class="tab on" onclick="goTab('write',this)">✍️ Write</button>
+        <button class="tab" onclick="goTab('ask',this)">🔍 Ask AI</button>
+        <button class="tab" onclick="goTab('translate',this)">🌍 Translate</button>
+        <button class="tab" onclick="goTab('image',this)">🎨 Image</button>
+        <button class="tab" onclick="goTab('summarize',this)">📄 Summarize</button>
+        <button class="tab" onclick="goTab('quiz',this)">🧠 Quiz</button>
+        <button class="tab" onclick="goTab('mood',this)">🌤️ Mood</button>
+        <button class="tab" onclick="goTab('pro',this)">⭐ Pro <span class="pro-pip">PRO</span></button>
+        <button class="tab" onclick="goTab('settings',this)">⚙️</button>
+      </div>
+
+      <!-- Panels -->
+      <div class="panels" id="panels">
+
+        <!-- ── WRITE ── -->
+        <div class="panel on" id="panel-write">
+          <div class="quick-grid">
+            <button class="qcard" onclick="qWrite('Professional email declining a meeting politely','Professional','Short')"><strong>📧 Decline Email</strong><span>Polite & professional</span></button>
+            <button class="qcard" onclick="qWrite('Compelling LinkedIn bio for a software engineer','Professional','Medium')"><strong>💼 LinkedIn Bio</strong><span>Stand out professionally</span></button>
+            <button class="qcard" onclick="qWrite('Short creative story about a rainy evening','Creative','Short')"><strong>📖 Short Story</strong><span>Creative fiction</span></button>
+            <button class="qcard" onclick="qWrite('Heartfelt apology message to a friend','Casual','Short')"><strong>💌 Apology Note</strong><span>Warm & sincere</span></button>
+          </div>
+          <div class="card">
+            <div class="lbl">✍️ What to Write</div>
+            <textarea id="wPrompt" rows="4" placeholder="Describe what you want written — essay, email, story, speech…" oninput="cc(this,'wc')"></textarea>
+            <div class="input-toolbar">
+              <button class="tool-btn" id="wVoice" onclick="voiceInput('wPrompt','wVoice')" title="Voice input">🎙️</button>
+              <button class="tool-btn" onclick="triggerUpload('wFile','wPrompt')" title="Upload file">📎</button>
+              <input type="file" id="wFile" style="display:none" accept=".txt,.doc,.docx,.pdf" onchange="handleUpload(this,'wPrompt')">
+              <div id="wFileChip" style="display:none" class="file-chip"><span id="wFileName"></span><button onclick="clearFile('wFile','wFileChip','wPrompt')">✕</button></div>
+              <span class="char-c" id="wc" style="margin-left:auto">0 chars</span>
+            </div>
+            <div class="hr"></div>
+            <div class="row">
+              <div class="sel-wrap"><span>Style:</span><select id="wStyle"><option>Professional</option><option>Creative</option><option>Casual</option><option>Academic</option><option>Persuasive</option><option>Poetic</option><option>Humorous</option><option>Formal</option><option>Storytelling</option></select></div>
+              <div class="sel-wrap"><span>Length:</span><select id="wLen"><option>Short</option><option selected>Medium</option><option>Long</option></select></div>
+              <div class="sel-wrap"><span>Tone:</span><select id="wTone"><option>Neutral</option><option>Warm</option><option>Bold</option><option>Gentle</option><option>Urgent</option></select></div>
+              <button class="btn" id="wBtn" onclick="doWrite()">✨ Generate</button>
+            </div>
+          </div>
+          <div class="out-card" id="wOut" style="display:none">
+            <div class="out-hdr"><span class="out-title">Generated Text</span>
+              <div style="display:flex;gap:5px">
+                <button class="btn ghost" style="padding:5px 9px;font-size:.7rem" onclick="cp('wBody')">📋</button>
+                <button class="btn ghost" style="padding:5px 9px;font-size:.7rem" onclick="doRewrite()">🔄</button>
+                <button class="btn ghost" style="padding:5px 9px;font-size:.7rem" onclick="hideOut('wOut','wBody')">✕</button>
+              </div>
+            </div>
+            <div class="out-body" id="wBody"></div>
+          </div>
+        </div>
+
+        <!-- ── ASK AI ── -->
+        <div class="panel" id="panel-ask">
+          <div class="quick-grid">
+            <button class="qcard" onclick="qAsk('Explain quantum computing simply')"><strong>⚛️ Quantum</strong><span>Easy explanation</span></button>
+            <button class="qcard" onclick="qAsk('Best ways to save money in Nigeria')"><strong>💰 Money Tips</strong><span>Nigerian context</span></button>
+            <button class="qcard" onclick="qAsk('How does the human immune system work')"><strong>🧬 Immune System</strong><span>Health science</span></button>
+            <button class="qcard" onclick="qAsk('Top skills to learn in 2025 for jobs')"><strong>🚀 Top Skills</strong><span>Career growth</span></button>
+          </div>
+          <div class="card">
+            <div class="lbl">🔍 Your Question</div>
+            <input type="text" id="askQ" placeholder="Ask anything…" onkeydown="if(event.key==='Enter')doAsk()">
+            <div class="input-toolbar">
+              <button class="tool-btn" id="askVoice" onclick="voiceInput('askQ','askVoice')" title="Voice input">🎙️</button>
+              <button class="tool-btn" onclick="triggerUpload('askFile','askQ')" title="Upload file">📎</button>
+              <input type="file" id="askFile" style="display:none" accept=".txt,.pdf,.doc,.docx" onchange="handleUpload(this,'askQ')">
+              <div id="askFileChip" style="display:none" class="file-chip"><span id="askFileName"></span><button onclick="clearFile('askFile','askFileChip','askQ')">✕</button></div>
+            </div>
+            <div class="hr"></div>
+            <div class="row">
+              <div class="sel-wrap"><span>Depth:</span><select id="askDepth"><option>Quick</option><option selected>Detailed</option><option>Expert</option></select></div>
+              <div class="sel-wrap"><span>Format:</span><select id="askFmt"><option>Paragraphs</option><option>Bullet points</option><option>Step-by-step</option></select></div>
+              <button class="btn" id="askBtn" onclick="doAsk()">🔍 Ask Noor</button>
+            </div>
+          </div>
+          <div class="out-card" id="askOut" style="display:none">
+            <div class="out-hdr"><span class="out-title">Answer</span>
+              <div style="display:flex;gap:5px">
+                <button class="btn ghost" style="padding:5px 9px;font-size:.7rem" onclick="cp('askBody')">📋</button>
+                <button class="btn ghost" style="padding:5px 9px;font-size:.7rem" onclick="hideOut('askOut','askBody')">✕</button>
+              </div>
+            </div>
+            <div class="out-body" id="askBody"></div>
+          </div>
+        </div>
+
+        <!-- ── TRANSLATE ── -->
+        <div class="panel" id="panel-translate">
+          <div class="card">
+            <div class="lbl">🌍 Translate</div>
+            <div style="display:flex;gap:7px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+              <div class="sel-wrap" style="flex:1"><span>From:</span><select id="tFrom"><option value="auto">Auto-detect</option><option>English</option><option>Arabic</option><option>French</option><option>Spanish</option><option>German</option><option>Chinese</option><option>Japanese</option><option>Russian</option><option>Portuguese</option><option>Italian</option><option>Korean</option><option>Hindi</option><option>Turkish</option><option>Hausa</option><option>Yoruba</option><option>Swahili</option><option>Igbo</option><option>Dutch</option><option>Polish</option><option>Swedish</option></select></div>
+              <button class="icon-btn" onclick="swapLangs()" title="Swap">⇄</button>
+              <div class="sel-wrap" style="flex:1"><span>To:</span><select id="tTo"><option>English</option><option>Arabic</option><option>French</option><option>Spanish</option><option>German</option><option>Chinese</option><option>Japanese</option><option>Russian</option><option>Portuguese</option><option>Italian</option><option>Korean</option><option>Hindi</option><option>Turkish</option><option>Hausa</option><option>Yoruba</option><option>Swahili</option><option>Igbo</option><option>Dutch</option><option>Polish</option><option>Swedish</option></select></div>
+            </div>
+            <textarea id="tInput" rows="4" placeholder="Enter text to translate…" oninput="cc(this,'tc')"></textarea>
+            <div class="input-toolbar">
+              <button class="tool-btn" id="tVoice" onclick="voiceInput('tInput','tVoice')" title="Voice input">🎙️</button>
+              <button class="tool-btn" onclick="triggerUpload('tFile','tInput')" title="Upload">📎</button>
+              <input type="file" id="tFile" style="display:none" accept=".txt" onchange="handleUpload(this,'tInput')">
+              <div id="tFileChip" style="display:none" class="file-chip"><span id="tFileName"></span><button onclick="clearFile('tFile','tFileChip','tInput')">✕</button></div>
+              <span class="char-c" id="tc" style="margin-left:auto">0 chars</span>
+            </div>
+            <div class="hr"></div>
+            <div class="row">
+              <div class="sel-wrap"><span>Style:</span><select id="tStyle"><option>Natural</option><option>Formal</option><option>Casual</option></select></div>
+              <button class="btn" id="tBtn" onclick="doTranslate()">🌍 Translate</button>
+            </div>
+          </div>
+          <div class="out-card" id="tOut" style="display:none">
+            <div class="out-hdr"><span class="out-title">Translation</span>
+              <div style="display:flex;gap:5px">
+                <button class="btn ghost" style="padding:5px 9px;font-size:.7rem" onclick="cp('tBody')">📋</button>
+                <button class="btn ghost" style="padding:5px 9px;font-size:.7rem" onclick="hideOut('tOut','tBody')">✕</button>
+              </div>
+            </div>
+            <div class="out-body" id="tBody"></div>
+          </div>
+        </div>
+
+        <!-- ── IMAGE ── -->
+        <div class="panel" id="panel-image">
+          <div class="card">
+            <div class="lbl">🎨 Describe Your Image</div>
+            <textarea id="iPrompt" rows="3" placeholder="A mystical African landscape at sunset with golden baobab trees…" oninput="cc(this,'ic')"></textarea>
+            <div class="input-toolbar">
+              <button class="tool-btn" id="iVoice" onclick="voiceInput('iPrompt','iVoice')" title="Voice input">🎙️</button>
+              <span class="char-c" id="ic" style="margin-left:auto">0 chars</span>
+            </div>
+            <div class="hr"></div>
+            <div class="lbl">Art Style</div>
+            <div class="style-grid" id="styleGrid"></div>
+            <div class="lbl" style="margin-top:10px">Aspect Ratio</div>
+            <div class="size-row" id="sizeRow"></div>
+            <div class="hr"></div>
+            <div class="row">
+              <button class="btn" id="iBtn" onclick="doImage()">🎨 Generate Image</button>
+            </div>
+          </div>
+          <div class="out-card" id="iOut" style="display:none">
+            <div class="out-hdr"><span class="out-title">Generated Image</span>
+              <div style="display:flex;gap:5px">
+                <button class="btn ghost" style="padding:5px 9px;font-size:.7rem" onclick="dlImg()">⬇️</button>
+                <button class="btn ghost" style="padding:5px 9px;font-size:.7rem" onclick="hideImgOut()">✕</button>
+              </div>
+            </div>
+            <div class="img-wrap" id="iWrap"></div>
+            <div style="font-size:.64rem;color:var(--mu);text-align:center;padding:0 14px 10px" id="iMeta"></div>
+          </div>
+        </div>
+
+        <!-- ── SUMMARIZE ── -->
+        <div class="panel" id="panel-summarize">
+          <div class="card">
+            <div class="lbl">📄 Paste or Upload Text</div>
+            <textarea id="sumInput" rows="7" placeholder="Paste any article, essay, document, website content here…" oninput="cc(this,'sumc')"></textarea>
+            <div class="input-toolbar">
+              <button class="tool-btn" onclick="triggerUpload('sumFile','sumInput')" title="Upload file">📎</button>
+              <input type="file" id="sumFile" style="display:none" accept=".txt,.pdf,.doc,.docx" onchange="handleUpload(this,'sumInput')">
+              <div id="sumFileChip" style="display:none" class="file-chip"><span id="sumFileName"></span><button onclick="clearFile('sumFile','sumFileChip','sumInput')">✕</button></div>
+              <span class="char-c" id="sumc" style="margin-left:auto">0 chars</span>
+            </div>
+            <div class="hr"></div>
+            <div class="row">
+              <div class="sel-wrap"><span>Type:</span><select id="sumType"><option>Key Points</option><option>One Paragraph</option><option>Tweet-length</option><option>Detailed</option></select></div>
+              <button class="btn" id="sumBtn" onclick="doSummarize()">📄 Summarize</button>
+            </div>
+          </div>
+          <div class="out-card" id="sumOut" style="display:none">
+            <div class="out-hdr"><span class="out-title">Summary</span>
+              <div style="display:flex;gap:5px">
+                <button class="btn ghost" style="padding:5px 9px;font-size:.7rem" onclick="cp('sumBody')">📋</button>
+                <button class="btn ghost" style="padding:5px 9px;font-size:.7rem" onclick="hideOut('sumOut','sumBody')">✕</button>
+              </div>
+            </div>
+            <div class="out-body" id="sumBody"></div>
+          </div>
+        </div>
+
+        <!-- ── QUIZ ── -->
+        <div class="panel" id="panel-quiz">
+          <div class="card">
+            <div class="lbl">🧠 Topic</div>
+            <input type="text" id="quizTopic" placeholder="e.g. Nigerian history, Python, Biology…" onkeydown="if(event.key==='Enter')doQuiz()">
+            <div class="hr"></div>
+            <div class="row">
+              <div class="sel-wrap"><span>Difficulty:</span><select id="quizDiff"><option>Easy</option><option selected>Medium</option><option>Hard</option></select></div>
+              <div class="sel-wrap"><span>Questions:</span><select id="quizNum"><option>3</option><option selected>5</option><option>10</option></select></div>
+              <button class="btn" id="quizBtn" onclick="doQuiz()">🧠 Generate Quiz</button>
+            </div>
+          </div>
+          <div id="quizArea"></div>
+        </div>
+
+        <!-- ── MOOD ── -->
+        <div class="panel" id="panel-mood">
+          <div class="card">
+            <div class="lbl">🌤️ How are you feeling?</div>
+            <div class="mood-row" id="moodRow">
+              <button class="mood-btn" onclick="pickMood(this,'😊 Happy')">😊 Happy</button>
+              <button class="mood-btn" onclick="pickMood(this,'😔 Sad')">😔 Sad</button>
+              <button class="mood-btn" onclick="pickMood(this,'😤 Frustrated')">😤 Frustrated</button>
+              <button class="mood-btn" onclick="pickMood(this,'😰 Anxious')">😰 Anxious</button>
+              <button class="mood-btn" onclick="pickMood(this,'😐 Neutral')">😐 Neutral</button>
+              <button class="mood-btn" onclick="pickMood(this,'🥱 Tired')">🥱 Tired</button>
+              <button class="mood-btn" onclick="pickMood(this,'🤩 Excited')">🤩 Excited</button>
+              <button class="mood-btn" onclick="pickMood(this,'😞 Overwhelmed')">😞 Overwhelmed</button>
+            </div>
+            <div class="hr"></div>
+            <div class="lbl">Anything else?</div>
+            <textarea id="moodNote" rows="2" placeholder="Share more if you'd like…"></textarea>
+            <div class="hr"></div>
+            <button class="btn full" id="moodBtn" onclick="doMood()">🌤️ Get Support from Noor</button>
+          </div>
+          <div class="out-card" id="moodOut" style="display:none">
+            <div class="out-hdr"><span class="out-title">Noor's Response</span></div>
+            <div class="out-body" id="moodBody"></div>
+          </div>
+        </div>
+
+        <!-- ── PRO TOOLS ── -->
+        <div class="panel" id="panel-pro">
+          <div id="proGate"></div>
+        </div>
+
+        <!-- ── SETTINGS ── -->
+        <div class="panel" id="panel-settings">
+          <div class="card" id="settCard">
+            <div class="lbl">👤 Account</div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+              <div class="ava" style="width:46px;height:46px;font-size:1.2rem;" id="settAva">N</div>
+              <div><div style="font-size:.98rem;font-weight:700;" id="settName">—</div><div style="font-size:.76rem;color:var(--mu);" id="settEmail">—</div><div style="margin-top:4px;" id="settBadge"></div></div>
+            </div>
+            <div class="hr"></div>
+            <button class="btn gold full" style="margin-bottom:8px;" onclick="openUpgrade()">⭐ Upgrade to Pro — ₦1,500/mo</button>
+            <button class="btn danger full" onclick="tryLogout()">🚪 Log Out</button>
+          </div>
+
+          <!-- Remark -->
+          <div class="card">
+            <div class="lbl">💬 Leave a Remark</div>
+            <p style="font-size:.78rem;color:var(--mu);margin-bottom:10px;line-height:1.6">How is Noor AI working for you? Share feedback, suggestions, or anything.</p>
+            <div class="fi"><input type="text" id="remName" placeholder="Your name (optional)"></div>
+            <textarea id="remText" rows="3" style="background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);padding:10px 12px;width:100%;margin-bottom:8px;" placeholder="Tell us what you think…"></textarea>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:5px;">
+                <span style="font-size:.72rem;color:var(--mu)">Rating:</span>
+                <span id="stars" style="font-size:1.1rem;cursor:pointer;">
+                  <span onclick="rateStar(1)">⭐</span><span onclick="rateStar(2)">⭐</span><span onclick="rateStar(3)">⭐</span><span onclick="rateStar(4)">⭐</span><span onclick="rateStar(5)">⭐</span>
+                </span>
+              </div>
+              <button class="btn" style="margin-left:auto" onclick="submitRemark()">📨 Submit</button>
+            </div>
+            <div id="remMsg" style="font-size:.74rem;margin-top:7px;min-height:14px;"></div>
+          </div>
+
+          <!-- Support -->
+          <div class="card">
+            <div class="lbl">📞 Contact Support</div>
+            <a class="sup-link" href="mailto:noorframestudio.ng@gmail.com">
+              <span class="si">📧</span><div><div class="st">Email Support</div><div class="ss">noorframestudio.ng@gmail.com</div></div>
+            </a>
+            <a class="sup-link" href="https://wa.me/2349031395092?text=Hello%2C%20I%20need%20help%20with%20Noor%20AI" target="_blank" style="border-color:rgba(37,211,102,.25);background:rgba(37,211,102,.04);">
+              <span class="si">💬</span><div><div class="st" style="color:#25d366">WhatsApp Support</div><div class="ss">Tap to chat — quick response</div></div>
+            </a>
+          </div>
+
+          <!-- About -->
+          <div class="card">
+            <div class="lbl">✦ About Noor AI</div>
+            <div style="font-size:.82rem;color:var(--mu);line-height:1.8;">
+              <strong style="color:var(--tx)">Noor AI</strong> — your all-in-one intelligent companion for writing, learning, creating, translating, and more.<br>
+              <span style="margin-top:6px;display:block;">Built by <strong style="color:var(--a)">Noor Frame Studio</strong> · v3.0</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /panels -->
+    </div><!-- /main -->
+  </div><!-- /flex -->
+</div><!-- /app -->
+
+<!-- LIVE AI MODAL -->
+<div id="liveModal">
+  <div style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;background:var(--ag);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Noor Live AI</div>
+  <div class="live-orb" id="liveOrb" onclick="toggleListen()">🎙️</div>
+  <div class="live-status" id="liveStatus">Tap to speak</div>
+  <div class="live-transcript" id="liveTx"></div>
+  <div class="live-response" id="liveResp"></div>
+  <div style="display:flex;gap:10px;margin-top:8px;">
+    <button class="btn ghost" onclick="closeLive()">✕ Close</button>
+    <button class="btn" id="liveSend" onclick="sendLive()" style="display:none">Send ✈️</button>
+  </div>
+</div>
+
+<!-- UPGRADE MODAL -->
+<div id="upgradeModal">
+  <div class="upgrade-box">
+    <div style="font-size:1.8rem;margin-bottom:7px;">⭐</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;background:var(--pg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;">Upgrade to Pro</div>
+    <div style="color:var(--mu);font-size:.76rem;margin-bottom:16px;">Unlock all of Noor AI's power</div>
+    <div class="compare">
+      <div class="cmp">
+        <h4>🆓 Free</h4>
+        <ul class="fl">
+          <li><span class="ck">✓</span>Unlimited writing (9 styles)</li>
+          <li><span class="ck">✓</span>AI Q&A with formats</li>
+          <li><span class="ck">✓</span>20-language translate</li>
+          <li><span class="ck">✓</span>Image generation</li>
+          <li><span class="ck">✓</span>Summarizer</li>
+          <li><span class="ck">✓</span>Quiz generator</li>
+          <li><span class="ck">✓</span>Mood support</li>
+          <li><span class="ck">✓</span>Voice input</li>
+          <li><span class="ck">✓</span>File upload</li>
+          <li><span class="ck n">✗</span>Code assistant</li>
+          <li><span class="ck n">✗</span>Grammar checker</li>
+          <li><span class="ck n">✗</span>CV/Cover letter</li>
+        </ul>
+      </div>
+      <div class="cmp pro">
+        <h4>⭐ Pro — ₦1,500/mo</h4>
+        <ul class="fl">
+          <li><span class="ck">✓</span>Everything in Free</li>
+          <li><span class="ck">✓</span>🧑‍💻 Code assistant</li>
+          <li><span class="ck">✓</span>✏️ Grammar checker</li>
+          <li><span class="ck">✓</span>📋 CV + Cover letter</li>
+          <li><span class="ck">✓</span>🏢 Business names</li>
+          <li><span class="ck">✓</span>🌐 Social captions</li>
+          <li><span class="ck">✓</span>💬 AI Chat (memory)</li>
+          <li><span class="ck">✓</span>📊 Study notes</li>
+          <li><span class="ck">✓</span>🎨 Premium image styles</li>
+          <li><span class="ck">✓</span>📚 Unlimited history</li>
+          <li><span class="ck">✓</span>⚡ Priority speed</li>
+        </ul>
+      </div>
+    </div>
+    <div style="background:rgba(255,201,77,.06);border:1px solid rgba(255,201,77,.2);border-radius:var(--rs);padding:13px;font-size:.78rem;color:var(--mu);line-height:1.7;margin-bottom:14px;">
+      <strong style="color:var(--gold)">💳 Pay via Opay</strong><br>
+      <span style="font-size:1.2rem;font-weight:800;color:var(--gold)">9094938980</span><br>
+      Name: <strong style="color:var(--tx)">Kareem Zainab Temitope</strong><br>
+      ₦1,500/month &nbsp;·&nbsp; ₦3,500/quarter (save ₦1,000)
+    </div>
+    <button class="btn gold full" style="margin-bottom:8px;" onclick="closeUpgrade()">✅ I've Sent Payment</button>
+    <button class="btn ghost full" onclick="closeUpgrade()">Maybe Later</button>
+  </div>
+</div>
+
+<!-- USER MENU -->
+<div id="userMenu">
+  <div class="umbox">
+    <div style="display:flex;align-items:center;gap:10px;padding:11px;background:var(--s2);border-radius:var(--rs);margin-bottom:14px;">
+      <div class="ava" id="umAva">N</div>
+      <div><div style="font-size:.88rem;font-weight:700;" id="umName">User</div><div style="font-size:.68rem;color:var(--mu);" id="umPlan">Free</div></div>
+    </div>
+    <button class="btn gold full" style="margin-bottom:7px;" onclick="closeUserMenu();openUpgrade()">⭐ Upgrade to Pro</button>
+    <button class="btn ghost full" style="margin-bottom:7px;" onclick="closeUserMenu();goTab('settings',null)">⚙️ Settings & Support</button>
+    <a href="https://wa.me/2349031395092?text=Hello%2C%20I%20need%20help%20with%20Noor%20AI" target="_blank" style="display:block;text-align:center;padding:9px;border-radius:var(--rs);border:1px solid rgba(37,211,102,.25);background:rgba(37,211,102,.04);color:#25d366;font-size:.8rem;font-weight:600;text-decoration:none;margin-bottom:7px;">💬 WhatsApp Support</a>
+    <button class="btn danger full" style="margin-bottom:7px;" onclick="closeUserMenu();tryLogout()">🚪 Log Out</button>
+    <button class="btn ghost full" onclick="closeUserMenu()">✕ Close</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ════════════════════════════════════════════
+     FIREBASE MODULE
+════════════════════════════════════════════ -->
+<script>
+// Global stubs — wait for Firebase then run
+function tryLogin(){
+  const msg=document.getElementById('lMsg');
+  if(window._tryLogin){ window._tryLogin(); return; }
+  // Firebase still loading — wait up to 5s
+  msg.textContent='⏳ Connecting…';
+  let tries=0;
+  const iv=setInterval(()=>{
+    if(window._tryLogin){ clearInterval(iv); window._tryLogin(); return; }
+    if(++tries>20){ clearInterval(iv); msg.textContent='❌ Connection failed. Make sure you have internet.'; msg.className='auth-msg e'; }
+  },250);
+}
+function tryRegister(){
+  const msg=document.getElementById('rMsg');
+  if(window._tryRegister){ window._tryRegister(); return; }
+  msg.textContent='⏳ Connecting…';
+  let tries=0;
+  const iv=setInterval(()=>{
+    if(window._tryRegister){ clearInterval(iv); window._tryRegister(); return; }
+    if(++tries>20){ clearInterval(iv); msg.textContent='❌ Connection failed. Check your internet.'; msg.className='auth-msg e'; }
+  },250);
+}
+function tryLogout(){ if(window._tryLogout)window._tryLogout(); else showAuth(); }
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, addDoc, getDocs, query, orderBy, deleteDoc }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ╔══════════════════════════════════════════╗
+// ║  YOUR FIREBASE CONFIG                    ║
+// ╚══════════════════════════════════════════╝
+const firebaseConfig = {
+  apiKey: "AIzaSyBPGigeGJwQheycbSmca8CTvFJmuP20KEU",
+  authDomain: "noor-ai-9221c.firebaseapp.com",
+  projectId: "noor-ai-9221c",
+  storageBucket: "noor-ai-9221c.firebasestorage.app",
+  messagingSenderId: "636838337389",
+  appId: "1:636838337389:web:b4c67fc7345b70cc919864"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+window.__db   = db;
+window.__auth = auth;
+window.__fb   = { doc,setDoc,getDoc,updateDoc,increment,collection,addDoc,getDocs,query,orderBy,deleteDoc };
+
+// ── AUTH STATE ──
+onAuthStateChanged(auth, async fbUser => {
+  hideSplash();
+  if(fbUser){
+    try{
+      const snap = await getDoc(doc(db,'users',fbUser.uid));
+      if(snap.exists()){
+        window.__user = {id:fbUser.uid, ...snap.data()};
+        bootApp(window.__user);
+        loadHistory(fbUser.uid);
+      } else { showAuth(); }
+    } catch { showAuth(); }
+  } else { showAuth(); }
+});
+
+// Timeout fallback
+setTimeout(()=>{ hideSplash(); if(!window.__user) showAuth(); }, 3000);
+
+// ── LOGIN ──
+window._tryLogin = async function(){
+  const email = document.getElementById('lEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('lPass').value;
+  const msg   = document.getElementById('lMsg');
+  if(!email||!pass){ setMsg(msg,'⚠️ Enter your email and password','e'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled=true; btn.textContent='Signing in…';
+  try{
+    await signInWithEmailAndPassword(auth, email, pass);
+  }catch(e){
+    setMsg(msg,'❌ '+fmtErr(e.code),'e');
+    btn.disabled=false; btn.textContent='Sign In →';
+  }
+};
+
+// ── REGISTER ──
+window._tryRegister = async function(){
+  const name  = document.getElementById('rName').value.trim();
+  const email = document.getElementById('rEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('rPass').value;
+  const ref   = document.getElementById('rRef').value.trim();
+  const msg   = document.getElementById('rMsg');
+  if(!name||!email||!pass){ setMsg(msg,'⚠️ Fill all fields','e'); return; }
+  if(pass.length<6){ setMsg(msg,'⚠️ Password min 6 characters','e'); return; }
+  const btn = document.getElementById('regBtn');
+  btn.disabled=true; btn.textContent='Creating…';
+  try{
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    const profile = {
+      id:cred.user.uid, name, email,
+      plan: window.__pickedPlan==='pro' ? 'pending_pro' : 'free',
+      payRef: ref||null, role:'user',
+      joined: new Date().toISOString(),
+      usage:{write:0,search:0,translate:0,image:0,summarize:0,quiz:0,mood:0}
+    };
+    await setDoc(doc(db,'users',cred.user.uid), profile);
+    setMsg(msg,'✅ Account created! Signing in…','ok');
+  }catch(e){
+    setMsg(msg,'❌ '+fmtErr(e.code),'e');
+    btn.disabled=false; btn.textContent='Create Account →';
+  }
+};
+
+// ── LOGOUT ──
+window._tryLogout = async function(){
+  await signOut(auth);
+  window.__user=null; window.__sessions=[];
+  showAuth(); toast('👋 Signed out');
+};
+
+// ── USAGE TRACKING ──
+window.trackUse = async function(type){
+  const u=window.__user; if(!u)return;
+  try{ await updateDoc(doc(db,'users',u.id),{[`usage.${type}`]:increment(1)}); }catch{}
+};
+
+// ── SAVE REMARK ──
+window.saveRemark = async function(name,text,rating){
+  const u=window.__user;
+  try{
+    await addDoc(collection(db,'remarks'),{
+      name: name||(u?.name||'Anonymous'),
+      email: u?.email||'',
+      text, rating, time:new Date().toISOString()
+    });
+  }catch{}
+};
+
+// ── CHAT HISTORY ──
+window.loadHistory = async function(uid){
+  try{
+    const q2 = query(collection(db,'users',uid,'sessions'),orderBy('updatedAt','desc'));
+    const snap = await getDocs(q2);
+    window.__sessions = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderSidebar();
+  }catch{ window.__sessions=[]; }
+};
+
+window.saveSession = async function(sess){
+  const u=window.__user; if(!u)return;
+  try{
+    if(sess.id){
+      await updateDoc(doc(db,'users',u.id,'sessions',sess.id),{
+        title:sess.title, preview:sess.preview,
+        updatedAt:new Date().toISOString(), messages:sess.messages
+      });
+    } else {
+      const ref2=await addDoc(collection(db,'users',u.id,'sessions'),{
+        title:sess.title, preview:sess.preview, type:sess.type,
+        updatedAt:new Date().toISOString(), messages:sess.messages
+      });
+      sess.id=ref2.id;
+    }
+    const idx=window.__sessions.findIndex(s=>s.id===sess.id);
+    if(idx>=0) window.__sessions[idx]=sess; else window.__sessions.unshift(sess);
+    renderSidebar();
+  }catch{}
+};
+
+window.deleteSession = async function(sid, e){
+  e.stopPropagation();
+  const u=window.__user; if(!u)return;
+  try{
+    await deleteDoc(doc(db,'users',u.id,'sessions',sid));
+    window.__sessions = window.__sessions.filter(s=>s.id!==sid);
+    renderSidebar(); toast('🗑️ Deleted');
+  }catch{}
+};
+
+function fmtErr(code){
+  return({'auth/email-already-in-use':'Email already registered','auth/invalid-email':'Invalid email format','auth/weak-password':'Password too weak (min 6)','auth/user-not-found':'No account found','auth/wrong-password':'Wrong password','auth/invalid-credential':'Wrong email or password','auth/too-many-requests':'Too many attempts, wait a moment'}[code]||'Something went wrong. Try again.');
+}
+</script>
+
+<!-- ════════════════════════════════════════════
+     MAIN APP SCRIPT
+════════════════════════════════════════════ -->
+<script>
+// ═══ STATE ═══
+window.__user=null;
+window.__sessions=[];
+window.__activeSession=null;
+window.__pickedPlan='free';
+window.__mood='';
+window.__starRating=0;
+window.__chatHistory=[];
+let selStyle='photorealistic', selSize='1:1', lastImgUrl=null;
+let liveRec=null, liveTx='';
+
+// ═══ GROQ API ═══
+const GROQ_KEY='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';
+const GROQ_MODEL='llama-3.3-70b-versatile';
+
+async function ai(system, user, maxTok=1200){
+  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+    body:JSON.stringify({model:GROQ_MODEL,max_tokens:maxTok,messages:[{role:'system',content:system},{role:'user',content:user}]})
+  });
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||'Error '+r.status);}
+  const d=await r.json();
+  return d.choices[0].message.content;
+}
+
+async function aiChat(messages, maxTok=1000){
+  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+    body:JSON.stringify({model:GROQ_MODEL,max_tokens:maxTok,messages})
+  });
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||'Error '+r.status);}
+  const d=await r.json();
+  return d.choices[0].message.content;
+}
+
+// ═══ UI HELPERS ═══
+const $=id=>document.getElementById(id);
+function toast(m,dur=2800){const t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),dur);}
+function setMsg(el,m,cls){el.textContent=m;el.className='auth-msg '+(cls||'');}
+function loading(id){$(id).innerHTML='<div class="dots"><span></span><span></span><span></span></div>';}
+function setBtn(id,dis){const b=$(id);if(b)b.disabled=dis;}
+function cc(el,id){$(id).textContent=el.value.length+' chars';}
+function cp(id){navigator.clipboard.writeText($(id).textContent).then(()=>toast('📋 Copied!'));}
+function hideOut(oid,bid){$(oid).style.display='none';$(bid).textContent='';}
+function hideImgOut(){$('iOut').style.display='none';$('iWrap').innerHTML='';}
+function showOut(oid,bid,txt){$(oid).style.display='';$(bid).textContent=txt;}
+
+function hideSplash(){
+  const s=$('splash');if(s){s.classList.add('out');setTimeout(()=>s.style.display='none',400);}
+}
+function showAuth(){
+  $('app').classList.remove('on');
+  $('authWrap').style.display='flex';
+}
+function hideAuth(){
+  $('authWrap').style.display='none';
+  $('app').classList.add('on');
+}
+
+function bootApp(user){
+  hideAuth();
+  updateUI(user);
+  initImage();
+  renderPro(user);
+  fillSettings(user);
+  if(window.location.href.startsWith('file:')||window.location.href.startsWith('content:')){
+    $('hostBanner').style.display='block';
+  }
+  toast(user.role==='admin'?'👑 Welcome, Admin!':'✦ Welcome, '+user.name.split(' ')[0]+'!');
+}
+
+function updateUI(u){
+  const isPro=u.plan==='pro'||u.role==='admin';
+  const ini=u.name.charAt(0).toUpperCase();
+  const badge=$('hdrBadge');
+  badge.textContent=isPro?'⭐ PRO':'FREE';
+  badge.className='hdr-badge '+(isPro?'pro':'free');
+  ['sbAva','hdrAva','umAva'].forEach(id=>{const el=$(id);if(el)el.textContent=ini;});
+  $('sbName').textContent=u.name.split(' ')[0];
+  $('sbPlan').textContent=(isPro?'⭐ Pro':'🆓 Free')+' Plan';
+  $('umName').textContent=u.name;
+  $('umPlan').textContent=isPro?'⭐ Pro Plan':'🆓 Free Plan';
+}
+
+// ═══ AUTH TABS ═══
+function authMode(m){
+  $('tabLogin').classList.toggle('on',m==='login');
+  $('tabReg').classList.toggle('on',m==='reg');
+  $('fLogin').style.display=m==='login'?'':'none';
+  $('fReg').style.display=m==='reg'?'':'none';
+}
+function pickPlan(p){
+  window.__pickedPlan=p;
+  $('pcFree').classList.toggle('on',p==='free');
+  $('pcPro').classList.toggle('on',p==='pro');
+  $('payBox').classList.toggle('on',p==='pro');
+  $('refWrap').style.display=p==='pro'?'':'none';
+  $('regBtn').className='btn-main'+(p==='pro'?' gold':'');
+}
+
+// ═══ TABS ═══
+function goTab(name, btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  else {
+    // find by onclick
+    document.querySelectorAll('.tab').forEach(t=>{
+      if(t.getAttribute('onclick')?.includes("'"+name+"'"))t.classList.add('on');
+    });
+  }
+  $('panel-'+name).classList.add('on');
+  if(name==='settings'&&window.__user) fillSettings(window.__user);
+}
+
+// ═══ SIDEBAR ═══
+function toggleSidebar(){$('sidebar').classList.toggle('hidden');}
+function newChat(){window.__activeSession=null;renderSidebar();toast('✦ New conversation');}
+function renderSidebar(){
+  const s=window.__sessions||[];
+  const icons={write:'✍️',ask:'🔍',translate:'🌍',image:'🎨',summarize:'📄',quiz:'🧠',chat:'💬',code:'🧑‍💻',mood:'🌤️'};
+  const box=$('sbList');
+  if(!s.length){box.innerHTML='<div style="padding:18px 10px;text-align:center;color:var(--mu);font-size:.72rem">Your chats appear here</div>';return;}
+  box.innerHTML=s.map(se=>`
+    <div class="ci${window.__activeSession?.id===se.id?' on':''}" onclick="loadChat('${se.id}')">
+      <div class="ci-ico">${icons[se.type]||'💬'}</div>
+      <div class="ci-info"><div class="ci-title">${esc(se.title||'Untitled')}</div><div class="ci-sub">${esc(se.preview||'')}</div></div>
+      <button class="ci-del" onclick="deleteSession('${se.id}',event)">✕</button>
+    </div>`).join('');
+}
+function loadChat(sid){
+  const se=window.__sessions.find(s=>s.id===sid); if(!se)return;
+  window.__activeSession=se; renderSidebar();
+  const last=(se.messages||[]).filter(m=>m.role==='assistant').pop();
+  if(last){
+    const outMap={write:['wOut','wBody'],ask:['askOut','askBody'],translate:['tOut','tBody'],summarize:['sumOut','sumBody']};
+    if(outMap[se.type]){
+      goTab(se.type,null);
+      const [oid,bid]=outMap[se.type];
+      $(oid).style.display=''; $(bid).textContent=last.content;
+    } else if(se.type==='chat'){
+      window.__chatHistory=[...se.messages]; goTab('pro',null); setTimeout(renderChat,200);
+    }
+  }
+  toast('📂 '+se.title);
+}
+function saveChat(type,title,preview,messages){
+  if(!window.saveSession)return;
+  const sess={type,title:title.slice(0,42),preview:preview.slice(0,58)+'…',messages,...(window.__activeSession||{})};
+  window.saveSession(sess);
+}
+
+// ═══ MODALS ═══
+function openUpgrade(){$('upgradeModal').classList.add('on');}
+function closeUpgrade(){$('upgradeModal').classList.remove('on');toast('✅ Pro activated after payment confirmation!');}
+function openUserMenu(){if(window.__user)updateUI(window.__user);$('userMenu').classList.add('on');}
+function closeUserMenu(){$('userMenu').classList.remove('on');}
+function openLive(){$('liveModal').classList.add('on');$('liveStatus').textContent='Tap orb to speak';}
+function closeLive(){$('liveModal').classList.remove('on');stopListen();}
+
+// ═══ VOICE INPUT ═══
+let activeRec=null, activeTarget=null, activeBtn=null;
+function voiceInput(targetId, btnId){
+  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){
+    toast('⚠️ Voice not supported in this browser. Use Chrome.');return;
+  }
+  if(activeRec){activeRec.stop();activeRec=null;$(activeBtn).classList.remove('recording');activeBtn=null;return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const rec=new SR();
+  rec.continuous=false; rec.interimResults=true; rec.lang='en-US';
+  activeRec=rec; activeBtn=btnId; activeTarget=targetId;
+  $(btnId).classList.add('recording');
+  rec.onresult=e=>{
+    const txt=Array.from(e.results).map(r=>r[0].transcript).join('');
+    $(targetId).value=txt;
+    cc($(targetId), targetId==='wPrompt'?'wc':targetId==='tInput'?'tc':targetId==='iPrompt'?'ic':'sumc');
+  };
+  rec.onerror=()=>{$(btnId).classList.remove('recording');activeRec=null;};
+  rec.onend=()=>{$(btnId).classList.remove('recording');activeRec=null;};
+  rec.start();
+  toast('🎙️ Listening… tap again to stop');
+}
+
+// ═══ FILE UPLOAD ═══
+function triggerUpload(fileId, targetId){
+  window._uploadTarget=targetId;
+  $(fileId).click();
+}
+function handleUpload(input, targetId){
+  const file=input.files[0]; if(!file)return;
+  const reader=new FileReader();
+  const chipId=input.id.replace('File','FileChip');
+  const nameId=input.id.replace('File','FileName');
+  reader.onload=e=>{
+    if($(targetId)) $(targetId).value=e.target.result.slice(0,8000);
+    if($(chipId)){$(chipId).style.display='inline-flex';$(nameId).textContent=file.name;}
+    toast('📎 '+file.name+' loaded');
+  };
+  reader.onerror=()=>toast('❌ Could not read file');
+  reader.readAsText(file);
+}
+function clearFile(fileId, chipId, targetId){
+  $(fileId).value=''; $(chipId).style.display='none';
+  if($(targetId))$(targetId).value='';
+}
+
+// ═══ LIVE AI ═══
+let liveListening=false;
+function toggleListen(){
+  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){
+    $('liveStatus').textContent='Voice not supported — type below';
+    $('liveTx').innerHTML='<input type="text" id="liveText" style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:var(--rs);padding:10px;color:var(--tx);font-family:DM Sans,sans-serif;font-size:.9rem;outline:none;" placeholder="Type your message…">';
+    $('liveSend').style.display='';
+    return;
+  }
+  if(liveListening){stopListen();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  liveRec=new SR(); liveRec.continuous=false; liveRec.interimResults=true; liveRec.lang='en-US';
+  liveListening=true;
+  $('liveOrb').classList.add('listening');
+  $('liveStatus').textContent='Listening…';
+  $('liveResp').style.display='none';
+  liveRec.onresult=e=>{
+    liveTx=Array.from(e.results).map(r=>r[0].transcript).join('');
+    $('liveTx').textContent=liveTx;
+  };
+  liveRec.onend=()=>{
+    liveListening=false;
+    $('liveOrb').classList.remove('listening');
+    if(liveTx) sendLive();
+  };
+  liveRec.onerror=()=>{liveListening=false;$('liveOrb').classList.remove('listening');$('liveStatus').textContent='Error — try again';};
+  liveRec.start();
+}
+function stopListen(){if(liveRec){liveRec.stop();liveRec=null;}liveListening=false;$('liveOrb').classList.remove('listening');}
+async function sendLive(){
+  const msg=liveTx||($('liveText')?.value)||'';
+  if(!msg){$('liveStatus').textContent='Say or type something first';return;}
+  $('liveOrb').classList.remove('listening');
+  $('liveOrb').classList.add('thinking');
+  $('liveStatus').textContent='Thinking…';
+  $('liveResp').style.display='none';
+  try{
+    const resp=await ai('You are Noor AI, a smart helpful assistant. Give a clear, concise response. Be friendly and direct.',msg,600);
+    $('liveOrb').classList.remove('thinking');
+    $('liveOrb').textContent='✅';
+    $('liveStatus').textContent='Done — tap to speak again';
+    $('liveResp').style.display='block';
+    $('liveResp').textContent=resp;
+    liveTx='';
+    // Text-to-speech
+    if('speechSynthesis' in window){
+      const utt=new SpeechSynthesisUtterance(resp);
+      utt.rate=0.95; utt.pitch=1.05;
+      window.speechSynthesis.speak(utt);
+    }
+    setTimeout(()=>{$('liveOrb').textContent='🎙️';},3000);
+  }catch(e){
+    $('liveOrb').classList.remove('thinking');
+    $('liveOrb').textContent='🎙️';
+    $('liveStatus').textContent='Error: '+e.message.slice(0,50);
+  }
+}
+
+// ═══ WRITE ═══
+function qWrite(p,s,l){$('wPrompt').value=p;$('wStyle').value=s;$('wLen').value=l;doWrite();}
+async function doWrite(){
+  const p=$('wPrompt').value.trim(); if(!p){toast('⚠️ Enter a prompt');return;}
+  setBtn('wBtn',true); $('wOut').style.display=''; loading('wBody');
+  try{
+    const res=await ai(`You are Noor AI, a brilliant writing assistant. Style: ${$('wStyle').value}. Tone: ${$('wTone').value}. Length: ${$('wLen').value} (Short=1-2 paragraphs, Medium=3-4, Long=5+). Output ONLY the content, no preamble or explanation.`,p,1400);
+    showOut('wOut','wBody',res); trackUse('write');
+    saveChat('write',p,res,[{role:'user',content:p},{role:'assistant',content:res}]);
+  }catch(e){$('wBody').textContent='❌ '+e.message;}
+  finally{setBtn('wBtn',false);}
+}
+async function doRewrite(){
+  const cur=$('wBody').textContent; if(!cur||cur.startsWith('❌'))return;
+  setBtn('wBtn',true); loading('wBody');
+  try{const res=await ai('Rewrite this text — same meaning, completely fresh wording and structure. Output ONLY the rewritten text.','Rewrite:\n\n'+cur,1400);$('wBody').textContent=res;toast('🔄 Rewritten!');}
+  catch(e){$('wBody').textContent='❌ '+e.message;}
+  finally{setBtn('wBtn',false);}
+}
+
+// ═══ ASK AI ═══
+function qAsk(q){$('askQ').value=q;doAsk();}
+async function doAsk(){
+  const q=$('askQ').value.trim(); if(!q){toast('⚠️ Enter a question');return;}
+  setBtn('askBtn',true); $('askOut').style.display=''; loading('askBody');
+  const dm={Quick:'Be concise, max 3 sentences.',Detailed:'Give a thorough answer.',Expert:'Expert-level analysis with depth.'};
+  const fm={Paragraphs:'Use flowing paragraphs.',['Bullet points']:'Use clear bullet points.',['Step-by-step']:'Use numbered steps.'};
+  try{
+    const res=await ai(`You are Noor AI. ${dm[$('askDepth').value]} ${fm[$('askFmt').value]}`,q,1200);
+    showOut('askOut','askBody',res); trackUse('search');
+    saveChat('ask',q,res,[{role:'user',content:q},{role:'assistant',content:res}]);
+  }catch(e){$('askBody').textContent='❌ '+e.message;}
+  finally{setBtn('askBtn',false);}
+}
+
+// ═══ TRANSLATE ═══
+function swapLangs(){const f=$('tFrom'),t=$('tTo'),fv=f.value==='auto'?'English':f.value;[f.value,t.value]=[t.value,fv];}
+async function doTranslate(){
+  const txt=$('tInput').value.trim(); if(!txt){toast('⚠️ Enter text');return;}
+  setBtn('tBtn',true); $('tOut').style.display=''; loading('tBody');
+  const from=$('tFrom').value==='auto'?'detected language':$('tFrom').value;
+  const to=$('tTo').value;
+  try{
+    const res=await ai(`Translate from ${from} to ${to} in a ${$('tStyle').value} style. Output ONLY the translation, nothing else.`,txt,1000);
+    showOut('tOut','tBody',res); trackUse('translate');
+    saveChat('translate',`${from}→${to}`,txt.slice(0,50),[{role:'user',content:txt},{role:'assistant',content:res}]);
+  }catch(e){$('tBody').textContent='❌ '+e.message;}
+  finally{setBtn('tBtn',false);}
+}
+
+// ═══ IMAGE ═══
+const imgStyles=[
+  {id:'photorealistic',l:'📷 Realistic'},{id:'oil painting',l:'🖌️ Oil Paint'},
+  {id:'watercolor',l:'💧 Watercolor'},{id:'digital art',l:'💻 Digital'},
+  {id:'anime',l:'🌸 Anime'},{id:'pencil sketch',l:'✏️ Sketch'},
+  {id:'cinematic',l:'🎬 Cinematic',pro:true},{id:'3d render',l:'🧊 3D Render',pro:true},
+  {id:'surrealism',l:'🌀 Surreal',pro:true},{id:'afrofuturism',l:'🌍 Afrofuturist',pro:true},
+  {id:'neon cyberpunk',l:'🌆 Cyberpunk',pro:true},{id:'impressionism',l:'🎭 Impressionist',pro:true},
+];
+const imgSizes=[{id:'1:1',w:512,h:512},{id:'16:9',w:768,h:432},{id:'9:16',w:432,h:768},{id:'4:3',w:640,h:480}];
+function initImage(){
+  const isPro=window.__user?.plan==='pro'||window.__user?.role==='admin';
+  const sg=$('styleGrid'); sg.innerHTML='';
+  imgStyles.forEach(s=>{
+    const b=document.createElement('button');b.className='style-btn'+(s.id===selStyle?' on':'');
+    b.innerHTML=s.l+(s.pro&&!isPro?' <small style="opacity:.4;font-size:.52rem">PRO</small>':'');
+    b.onclick=()=>{if(s.pro&&!isPro){toast('⭐ Pro style');openUpgrade();return;}selStyle=s.id;document.querySelectorAll('.style-btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');};
+    sg.appendChild(b);
+  });
+  const sr=$('sizeRow'); sr.innerHTML='';
+  imgSizes.forEach(s=>{
+    const b=document.createElement('button');b.className='size-btn'+(s.id===selSize?' on':'');
+    b.textContent=s.id;
+    b.onclick=()=>{selSize=s.id;document.querySelectorAll('.size-btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');};
+    sr.appendChild(b);
+  });
+}
+async function doImage(){
+  const p=$('iPrompt').value.trim(); if(!p){toast('⚠️ Describe your image');return;}
+  setBtn('iBtn',true); $('iOut').style.display='';
+  const sz=imgSizes.find(s=>s.id===selSize);
+  $('iWrap').innerHTML='<div style="padding:36px;text-align:center"><div class="dots"><span></span><span></span><span></span></div><p id="imgMsg" style="margin-top:10px;color:var(--mu);font-size:.76rem">Crafting your image…</p></div>';
+  const msgs=['Painting pixels…','Adding details…','Almost ready…']; let mi=0;
+  const mt=setInterval(()=>{mi=(mi+1)%msgs.length;const el=$('imgMsg');if(el)el.textContent=msgs[mi];},4000);
+  try{
+    let enhanced=p;
+    try{enhanced=await ai('Image prompt enhancer. Output ONLY an enhanced image prompt under 80 words for style: '+selStyle+'.',p,200);}catch{}
+    const seed=Math.floor(Math.random()*99999);
+    const enc=encodeURIComponent((enhanced+', '+selStyle+' style').slice(0,400));
+    const urls=[
+      `https://image.pollinations.ai/prompt/${enc}?width=${sz.w}&height=${sz.h}&nologo=true&seed=${seed}&enhance=true`,
+      `https://image.pollinations.ai/prompt/${enc}?width=${sz.w}&height=${sz.h}&nologo=true&model=flux&seed=${seed+1}`,
+      `https://image.pollinations.ai/prompt/${encodeURIComponent(p+', '+selStyle)}?width=${sz.w}&height=${sz.h}&nologo=true&seed=${seed+2}`,
+      `https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?width=512&height=512&nologo=true&seed=${seed+3}`
+    ];
+    const {img,url}=await tryImgs(urls);
+    clearInterval(mt);
+    img.style.cssText='max-width:100%;border-radius:var(--r);border:1px solid var(--b1);box-shadow:0 16px 48px rgba(0,0,0,.6);';
+    $('iWrap').innerHTML=''; $('iWrap').appendChild(img);
+    $('iMeta').innerHTML=`✨ ${selStyle} · ${sz.w}×${sz.h}`;
+    lastImgUrl=url; trackUse('image');
+  }catch(e){
+    clearInterval(mt);
+    $('iWrap').innerHTML=`<div style="padding:24px;text-align:center"><p style="color:var(--err);font-size:.82rem;margin-bottom:8px">⚠️ Image service slow — try again or change the prompt.</p><button class="btn ghost" onclick="hideImgOut()">← Back</button></div>`;
+  }finally{setBtn('iBtn',false);}
+}
+function tryImgs(urls,i=0){return new Promise((res,rej)=>{if(i>=urls.length){rej(new Error('Unavailable'));return;}const img=document.createElement('img');const t=setTimeout(()=>{img.src='';tryImgs(urls,i+1).then(res).catch(rej);},28000);img.onload=()=>{clearTimeout(t);res({img,url:urls[i]});};img.onerror=()=>{clearTimeout(t);tryImgs(urls,i+1).then(res).catch(rej);};img.src=urls[i];});}
+function dlImg(){if(!lastImgUrl)return;const a=document.createElement('a');a.href=lastImgUrl;a.download='noor-ai.jpg';a.target='_blank';a.click();}
+
+// ═══ SUMMARIZE ═══
+async function doSummarize(){
+  const txt=$('sumInput').value.trim(); if(!txt){toast('⚠️ Paste text first');return;}
+  if(txt.length<60){toast('⚠️ Text too short');return;}
+  setBtn('sumBtn',true); $('sumOut').style.display=''; loading('sumBody');
+  const tm={'Key Points':'Extract key points as bullet list.','One Paragraph':'Summarize in one paragraph.','Tweet-length':'280 chars max.','Detailed':'Detailed structured summary with sections.'};
+  try{
+    const res=await ai('You are Noor AI. '+tm[$('sumType').value]+' Output only the summary.',txt.slice(0,6000),800);
+    showOut('sumOut','sumBody',res); trackUse('summarize');
+    saveChat('summarize','Summary',res,[{role:'user',content:txt},{role:'assistant',content:res}]);
+  }catch(e){$('sumBody').textContent='❌ '+e.message;}
+  finally{setBtn('sumBtn',false);}
+}
+
+// ═══ QUIZ ═══
+async function doQuiz(){
+  const topic=$('quizTopic').value.trim(); if(!topic){toast('⚠️ Enter a topic');return;}
+  setBtn('quizBtn',true);
+  const area=$('quizArea');area.innerHTML='<div class="card"><div class="dots"><span></span><span></span><span></span></div> <span style="color:var(--mu);font-size:.8rem;margin-left:8px">Generating quiz…</span></div>';
+  try{
+    const num=$('quizNum').value, diff=$('quizDiff').value;
+    const raw=await ai(`Generate exactly ${num} multiple-choice questions about "${topic}" at ${diff} difficulty. Return ONLY valid JSON array with no markdown:\n[{"q":"question","options":["A","B","C","D"],"answer":0}]\nanswer is the index (0-3) of correct option.`,`Quiz: ${topic}`,1400);
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const qs=JSON.parse(clean);
+    renderQuiz(qs,topic); trackUse('quiz');
+  }catch(e){area.innerHTML=`<div class="card"><p style="color:var(--err);font-size:.84rem">❌ ${e.message}</p></div>`;}
+  finally{setBtn('quizBtn',false);}
+}
+function renderQuiz(qs,topic){
+  const area=$('quizArea');
+  window.__quizState={qs,score:0,answered:0,total:qs.length};
+  area.innerHTML=`<div class="card" style="margin-bottom:10px"><strong style="font-size:.86rem">🧠 ${esc(topic)}</strong> <span style="color:var(--mu);font-size:.74rem">${qs.length} questions</span></div>`
+    +qs.map((q,i)=>`<div class="card" id="qc${i}">
+      <div class="lbl">Q${i+1}</div>
+      <p style="font-size:.85rem;margin-bottom:10px;line-height:1.6">${esc(q.q)}</p>
+      ${q.options.map((o,j)=>`<button class="q-opt" id="qo${i}_${j}" onclick="ansQ(${i},${j},${q.answer})">${esc(o)}</button>`).join('')}
+      <div id="qf${i}" style="font-size:.74rem;margin-top:5px;display:none;"></div>
+    </div>`).join('');
+}
+window.ansQ=function(qi,ch,ans){
+  const st=window.__quizState;
+  if($(`qo${qi}_0`).disabled)return;
+  [0,1,2,3].forEach(j=>{const b=$(`qo${qi}_${j}`);if(b)b.disabled=true;});
+  const ok=ch===ans;
+  if(ok)st.score++;st.answered++;
+  $(`qo${qi}_${ch}`).className='q-opt '+(ok?'right':'wrong');
+  if(!ok)$(`qo${qi}_${ans}`).className='q-opt right';
+  const fb=$(`qf${qi}`);fb.style.display='';fb.textContent=ok?'✅ Correct!':'❌ Wrong';fb.style.color=ok?'var(--ok)':'var(--err)';
+  if(st.answered===st.total){
+    setTimeout(()=>{
+      const pct=Math.round(st.score/st.total*100);
+      const msg=pct===100?'🎉 Perfect!':pct>=70?'👏 Great!':pct>=40?'📚 Keep studying':'💪 Practice more';
+      $('quizArea').insertAdjacentHTML('beforeend',`<div class="out-card"><div class="out-hdr"><span class="out-title">Result</span></div><div class="out-body" style="text-align:center;padding:20px"><div style="font-size:1.8rem;margin-bottom:6px">${msg}</div><div style="font-size:1.3rem;font-weight:700;color:${pct>=70?'var(--ok)':'var(--a)'}">${st.score}/${st.total} · ${pct}%</div></div></div>`);
+    },500);
+  }
+};
+
+// ═══ MOOD ═══
+let pickedMood='';
+function pickMood(btn,m){pickedMood=m;document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+async function doMood(){
+  if(!pickedMood){toast('⚠️ Select a mood');return;}
+  setBtn('moodBtn',true); $('moodOut').style.display=''; loading('moodBody');
+  const note=$('moodNote').value.trim();
+  try{
+    const res=await ai(`You are Noor AI, a warm caring companion. The user is feeling ${pickedMood}. Give a thoughtful, genuine 2-3 paragraph response. Include a practical tip or affirmation. Be human, not clinical.`,note||`I am feeling ${pickedMood}`);
+    showOut('moodOut','moodBody',res); trackUse('mood');
+  }catch(e){$('moodBody').textContent='❌ '+e.message;}
+  finally{setBtn('moodBtn',false);}
+}
+
+// ═══ PRO GATE ═══
+function renderPro(user){
+  const g=$('proGate');
+  const isPro=user?.plan==='pro'||user?.role==='admin';
+  if(isPro){
+    g.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div class="card">
+        <div class="lbl">🧑‍💻 Code Assistant</div>
+        <textarea id="codeP" rows="3" placeholder="Write a function to validate an email…"></textarea>
+        <div class="hr"></div>
+        <div class="row">
+          <div class="sel-wrap"><span>Lang:</span><select id="codeLang"><option>Python</option><option>JavaScript</option><option>HTML/CSS</option><option>Java</option><option>C++</option><option>TypeScript</option><option>SQL</option></select></div>
+          <button class="btn" id="codeBtn" style="background:var(--pg);color:#1a0900" onclick="doCode()">⚡ Code</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="lbl">✏️ Grammar Checker</div>
+        <textarea id="gramP" rows="3" placeholder="Paste text to proofread…"></textarea>
+        <div class="hr"></div>
+        <div class="row">
+          <div class="sel-wrap"><span>Mode:</span><select id="gramMode"><option>Grammar only</option><option>Grammar + Style</option><option>Full rewrite</option></select></div>
+          <button class="btn" id="gramBtn" style="background:var(--pg);color:#1a0900" onclick="doGram()">✏️ Check</button>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div class="card">
+        <div class="lbl">📋 CV / Cover Letter</div>
+        <input type="text" id="cvRole" placeholder="Job title (e.g. Software Engineer)" style="margin-bottom:6px">
+        <textarea id="cvDetails" rows="3" placeholder="Your experience, skills…"></textarea>
+        <div class="hr"></div>
+        <div class="row">
+          <div class="sel-wrap"><span>Type:</span><select id="cvType"><option>CV Summary</option><option>Cover Letter</option><option>LinkedIn Summary</option></select></div>
+          <button class="btn" id="cvBtn" style="background:var(--pg);color:#1a0900" onclick="doCV()">📋 Write</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="lbl">🏢 Business Names</div>
+        <input type="text" id="bizDesc" placeholder="Describe your business…" style="margin-bottom:6px">
+        <div class="row">
+          <div class="sel-wrap"><span>Count:</span><select id="bizCount"><option>5 names</option><option>10 names</option></select></div>
+          <button class="btn" id="bizBtn" style="background:var(--pg);color:#1a0900" onclick="doBiz()">🏢 Generate</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="lbl">🌐 Social Caption Writer</div>
+      <input type="text" id="capTopic" placeholder="e.g. Launching my fashion brand, morning motivation…">
+      <div class="hr"></div>
+      <div class="row">
+        <div class="sel-wrap"><span>Platform:</span><select id="capPlat"><option>Instagram</option><option>Twitter/X</option><option>TikTok</option><option>LinkedIn</option><option>Facebook</option></select></div>
+        <div class="sel-wrap"><span>Tone:</span><select id="capTone"><option>Exciting</option><option>Professional</option><option>Funny</option><option>Inspirational</option></select></div>
+        <button class="btn" id="capBtn" style="background:var(--pg);color:#1a0900" onclick="doCaption()">✍️ Write</button>
+      </div>
+    </div>
+    <div class="out-card" id="proOut" style="display:none;margin-bottom:12px">
+      <div class="out-hdr"><span class="out-title" id="proTitle">Output</span>
+        <div style="display:flex;gap:5px">
+          <button class="btn ghost" style="padding:5px 9px;font-size:.7rem" onclick="cp('proBody')">📋</button>
+          <button class="btn ghost" style="padding:5px 9px;font-size:.7rem" onclick="hideOut('proOut','proBody')">✕</button>
+        </div>
+      </div>
+      <div class="out-body" id="proBody" style="font-family:inherit"></div>
+    </div>
+    <div class="card">
+      <div class="lbl">💬 AI Chat</div>
+      <div class="chat-box" id="chatBox"></div>
+      <input type="text" id="chatIn" placeholder="Ask anything…" onkeydown="if(event.key==='Enter')doChat()">
+      <div class="input-toolbar">
+        <button class="tool-btn" id="chatVoice" onclick="voiceInput('chatIn','chatVoice')" title="Voice">🎙️</button>
+        <button class="btn" style="background:var(--pg);color:#1a0900;margin-left:auto" id="chatBtn" onclick="doChat()">💬 Send</button>
+        <button class="btn ghost" style="padding:6px 10px;font-size:.7rem" onclick="window.__chatHistory=[];renderChat();toast('🗑️ Cleared')">🗑️</button>
+      </div>
+    </div>`;
+  } else {
+    g.innerHTML=`<div class="out-card"><div class="pro-lock">
+      <div style="font-size:2rem;margin-bottom:9px">⭐</div>
+      <h3>Unlock Pro Features</h3>
+      <p>Code assistant, grammar checker, CV builder, social captions, AI chat and more — just <strong style="color:var(--gold)">₦1,500/month</strong>.</p>
+      <button class="btn gold full" onclick="openUpgrade()">🚀 Upgrade to Pro</button>
+      <div style="background:rgba(255,201,77,.05);border:1px solid rgba(255,201,77,.15);border-radius:var(--rs);padding:12px;margin-top:13px;font-size:.76rem;color:var(--mu);line-height:1.7;text-align:left;">
+        <strong style="color:var(--gold)">💳 Pay via Opay:</strong><br>
+        <strong style="color:var(--tx);font-size:1rem">9094938980</strong><br>
+        Kareem Zainab Temitope<br>₦1,500/month &nbsp;·&nbsp; ₦3,500/quarter
+      </div>
+    </div></div>`;
+  }
+}
+
+// Pro feature functions
+async function proOut(title,sys,user,mono=false){
+  $('proOut').style.display=''; $('proTitle').textContent=title; loading('proBody');
+  $('proBody').style.fontFamily=mono?'monospace':'inherit';
+  try{const res=await ai(sys,user,1400);$('proBody').textContent=res;}
+  catch(e){$('proBody').textContent='❌ '+e.message;}
+}
+function doCode(){const p=$('codeP').value.trim();if(!p){toast('⚠️ Describe code needed');return;}setBtn('codeBtn',true);proOut('Generated Code',`Expert ${$('codeLang').value} developer. Write clean code with inline comments. Output ONLY the code, no markdown fences.`,p,true).finally(()=>setBtn('codeBtn',false));}
+function doGram(){const t=$('gramP').value.trim();if(!t){toast('⚠️ Paste text');return;}setBtn('gramBtn',true);const m={['Grammar only']:'Fix grammar/spelling only.',['Grammar + Style']:'Fix grammar, spelling, and improve style.','Full rewrite':'Fully rewrite for clarity and impact.'};proOut('Proofread',`Editor. ${m[$('gramMode').value]} Output ONLY the corrected text.`,t,false).finally(()=>setBtn('gramBtn',false));}
+function doCV(){const r=$('cvRole').value.trim(),d=$('cvDetails').value.trim();if(!r){toast('⚠️ Enter job role');return;}setBtn('cvBtn',true);const tp={'CV Summary':'CV summary/objective','Cover Letter':'cover letter','LinkedIn Summary':'LinkedIn about section'};proOut($('cvType').value,`Career coach. Write a professional ${tp[$('cvType').value]} for role: ${r}. ${d?'Background: '+d:''} Output ONLY the document.`,r+'\n'+d,false).finally(()=>setBtn('cvBtn',false));}
+function doBiz(){const d=$('bizDesc').value.trim();if(!d){toast('⚠️ Describe your business');return;}setBtn('bizBtn',true);proOut('Business Names',`Branding expert. Generate ${$('bizCount').value} creative business names with slogans for: "${d}". Format: 1. [Name] — "[Slogan]"`,d,false).finally(()=>setBtn('bizBtn',false));}
+function doCaption(){const t=$('capTopic').value.trim();if(!t){toast('⚠️ Enter topic');return;}setBtn('capBtn',true);proOut('Captions',`Social media expert. Write 3 ${$('capPlat').value} captions in ${$('capTone').value} tone about: "${t}". Include hashtags. Separate each with a blank line.`,t,false).finally(()=>setBtn('capBtn',false));}
+
+async function doChat(){
+  const input=$('chatIn');const msg=input.value.trim();if(!msg)return;
+  window.__chatHistory.push({role:'user',content:msg});input.value='';renderChat();setBtn('chatBtn',true);
+  try{
+    const msgs=[{role:'system',content:'You are Noor AI, a helpful warm assistant. Be concise and conversational.'},...window.__chatHistory.slice(-14)];
+    const reply=await aiChat(msgs,1000);
+    window.__chatHistory.push({role:'assistant',content:reply});renderChat();
+    saveChat('chat',msg,reply,[...window.__chatHistory]);
+  }catch(e){window.__chatHistory.push({role:'assistant',content:'❌ '+e.message});renderChat();}
+  finally{setBtn('chatBtn',false);}
+}
+function renderChat(){
+  const box=$('chatBox');if(!box)return;
+  box.innerHTML=window.__chatHistory.map(m=>`<div class="msg ${m.role==='user'?'u':'a'}"><div class="bubble">${String(m.content).replace(/</g,'&lt;')}</div></div>`).join('');
+  box.scrollTop=box.scrollHeight;
+}
+
+// ═══ SETTINGS ═══
+function fillSettings(u){
+  if(!u)return;
+  const isPro=u.plan==='pro'||u.role==='admin';
+  $('settAva').textContent=u.name.charAt(0).toUpperCase();
+  $('settName').textContent=u.name;
+  $('settEmail').textContent=u.email;
+  $('settBadge').innerHTML=isPro?'<span class="hdr-badge pro">⭐ Pro</span>':'<span class="hdr-badge free">🆓 Free</span>';
+}
+let selRating=0;
+function rateStar(n){selRating=n;document.querySelectorAll('#stars span').forEach((s,i)=>s.style.opacity=i<n?'1':'0.3');}
+async function submitRemark(){
+  const text=$('remText').value.trim();
+  if(!text){$('remMsg').textContent='⚠️ Write something first';$('remMsg').style.color='var(--err)';return;}
+  $('remMsg').textContent='📨 Sending…';$('remMsg').style.color='var(--mu)';
+  try{
+    if(window.saveRemark) await window.saveRemark($('remName').value.trim(),text,selRating);
+    $('remMsg').textContent='✅ Thank you! Your remark has been sent.';$('remMsg').style.color='var(--ok)';
+    $('remText').value='';$('remName').value='';selRating=0;
+    document.querySelectorAll('#stars span').forEach(s=>s.style.opacity='1');
+  }catch{$('remMsg').textContent='✅ Thanks for your feedback!';$('remMsg').style.color='var(--ok)';}
+}
+
+// ═══ UTILS ═══
+function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'):'—';}
+function trackUse(t){if(window.trackUse&&window.__user)window.trackUse(t);}
+
+// Show banners when opened from local file
+setTimeout(()=>{
+  const loc=window.location.href;
+  if(loc.startsWith('file:')||loc.startsWith('content:')||loc.includes('localhost')){
+    const b=$('hostBanner');if(b)b.style.display='block';
+    const n=$('localNotice');if(n)n.style.display='block';
+  }
+},600);
+</script>
+</body>
+</html>
